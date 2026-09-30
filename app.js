@@ -1,0 +1,5 @@
+const $=id=>document.getElementById(id),today=new Date().toISOString().slice(0,10);$("checkDate").min=today;$("date").min=today;
+async function all(){return fetch("/api/bookings").then(r=>r.json())}
+async function availability(d){if(!d)return;let a=await all();[["Ground Floor","g"],["First Floor","f"]].forEach(([fl,id])=>{let b=a.some(x=>x.date===d&&x.floor===fl&&x.status!=="Cancelled"),c=$(id);c.className="card "+(b?"booked":"available");c.querySelector("span").textContent=b?"Booked":"Available"})}
+$("checkDate").onchange=e=>availability(e.target.value);$("date").onchange=e=>{$("checkDate").value=e.target.value;availability(e.target.value)};
+$("form").onsubmit=async e=>{e.preventDefault();let b={name:$("name").value,phone:$("phone").value,date:$("date").value,floor:$("floor").value,event:$("event").value,guests:$("guests").value,message:$("message").value};let r=await fetch("/api/bookings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});let x=await r.json();$("msg").className=r.ok?"ok":"bad";$("msg").textContent=r.ok?"Booking request sent successfully!":"❌ "+x.error;if(r.ok){e.target.reset();availability(b.date)}};
